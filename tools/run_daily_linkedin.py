@@ -26,9 +26,16 @@ print("Growth Lab Co — Daily LinkedIn Content")
 print("=" * 50)
 
 print("\n[1/4] Fetching trending topics...")
-topics_output = run("fetch_trending_topics.py")
-with open(os.path.join(BASE, ".tmp", "topics.json"), "w") as f:
-    f.write(topics_output)
+topics_path = os.path.join(BASE, ".tmp", "topics.json")
+with open(topics_path, "w") as f:
+    result = subprocess.run(
+        [sys.executable, os.path.join(BASE, "tools", "fetch_trending_topics.py")],
+        cwd=BASE, stdout=f, text=True
+    )
+    if result.returncode != 0:
+        print(f"ERROR in fetch_trending_topics.py")
+        sys.exit(1)
+print("✓ Topics saved to .tmp/topics.json")
 
 print("\n[2/4] Writing LinkedIn post with Claude...")
 run("write_linkedin_post.py", ".tmp/topics.json")

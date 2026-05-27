@@ -5,6 +5,7 @@ Usage: python3 tools/fetch_trending_topics.py
 """
 
 import json
+import sys
 import time
 import requests
 import feedparser
@@ -49,7 +50,7 @@ def fetch_reddit():
                     })
             time.sleep(1)  # polite delay between subreddit requests
         except Exception as e:
-            print(f"Reddit fetch warning (r/{sub}): {e}", flush=True)
+            print(f"Reddit fetch warning (r/{sub}): {e}", file=sys.stderr, flush=True)
     return topics
 
 
@@ -70,7 +71,7 @@ def fetch_rss():
                         "comments": 0,
                     })
         except Exception as e:
-            print(f"RSS fetch warning ({feed_url}): {e}", flush=True)
+            print(f"RSS fetch warning ({feed_url}): {e}", file=sys.stderr, flush=True)
     return topics
 
 
