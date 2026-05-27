@@ -1,0 +1,43 @@
+name: Daily LinkedIn Content
+
+on:
+  schedule:
+    - cron: "0 22 * * *"  # 8am AEST (UTC+10) = 10pm UTC previous day
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install anthropic feedparser Pillow requests python-dotenv google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Write .env file
+        run: |
+          cat > .env << EOF
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+          REDDIT_CLIENT_ID=${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET=${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT=GrowthLabContent/1.0 by becbennett90
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_DRIVE_OUTPUT_FOLDER_ID=${{ secrets.GOOGLE_DRIVE_OUTPUT_FOLDER_ID }}
+          EOF
+
+      - name: Write token.json
+        run: echo '${{ secrets.GOOGLE_TOKEN_JSON }}' > token.json
+
+      - name: Create .tmp directory
+        run: mkdir -p .tmp
+
+      - name: Run LinkedIn content workflow
+        run: python3 tools/run_daily_linkedin.py
